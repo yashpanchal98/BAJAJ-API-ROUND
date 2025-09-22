@@ -1,9 +1,9 @@
-// File: src/main/java/com/bajaj_api_assignment/Bajaj/API/round/service/WebhookService.java
 package com.bajaj_api_assignment.Bajaj.API.round.service;
 
 import com.bajaj_api_assignment.Bajaj.API.round.model.WebhookRequest;
 import com.bajaj_api_assignment.Bajaj.API.round.model.WebhookResponse;
 import com.bajaj_api_assignment.Bajaj.API.round.model.SolutionRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -17,62 +17,60 @@ public class WebhookService {
     @Autowired
     private RestTemplate restTemplate;
 
-    // Default details - UPDATE THESE WITH YOUR ACTUAL DETAILS
-    private static final String DEFAULT_NAME = "Yash Panchal";  // Change this
-    private static final String DEFAULT_REG_NO = "0101CS221153";  // Change this to your registration number
-    private static final String DEFAULT_EMAIL = "pclyash@gmail.com";  // Change this
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    // TODO: UPDATE THESE WITH YOUR ACTUAL DETAILS BEFORE SUBMISSION
+    private static final String YOUR_NAME = "Yash Panchal";  // CHANGE THIS
+    private static final String YOUR_REG_NO = "0101CS221153";  // CHANGE THIS
+    private static final String YOUR_EMAIL = "pclyash@gmail.com";  // CHANGE THIS
 
     private static final String GENERATE_WEBHOOK_URL = "https://bfhldevapigw.healthrx.co.in/hiring/generateWebhook/JAVA";
-    private static final String SUBMIT_WEBHOOK_BASE_URL = "https://bfhldevapigw.healthrx.co.in/hiring/testWebhook/JAVA";
 
-    // Default method using predefined details
     public void executeWebhookFlow() {
-        executeWebhookFlowWithDetails(DEFAULT_NAME, DEFAULT_REG_NO, DEFAULT_EMAIL);
-    }
-
-    // Method with custom details for testing
-    public void executeWebhookFlowWithDetails(String name, String regNo, String email) {
         try {
             // Step 1: Generate webhook
             System.out.println("\n📡 Step 1: Generating webhook...");
-            WebhookResponse webhookResponse = generateWebhook(name, regNo, email);
+            System.out.println("Using registration: " + YOUR_REG_NO);
+
+            WebhookResponse webhookResponse = generateWebhook();
 
             if (webhookResponse == null || webhookResponse.getWebhook() == null) {
-                System.err.println("❌ Failed to generate webhook - No response received");
-                return;
+                throw new RuntimeException("Failed to generate webhook - No response received");
             }
 
             System.out.println("✅ Webhook URL received: " + webhookResponse.getWebhook());
             System.out.println("🔑 Access Token received: " + maskToken(webhookResponse.getAccessToken()));
 
-            // Step 2: Determine which SQL query to use based on registration number
-            System.out.println("\n📊 Step 2: Determining SQL query based on registration number...");
-            String finalQuery = getSQLQuery(regNo);
-            System.out.println("✅ SQL Query prepared");
+            // Step 2: Determine SQL query based on registration number
+            System.out.println("\n📊 Step 2: Preparing SQL query...");
+            String finalQuery = getSQLQuery(YOUR_REG_NO);
 
-            // Step 3: Submit solution to webhook
-            System.out.println("\n📤 Step 3: Submitting solution to webhook...");
+            // Step 3: Submit solution
+            System.out.println("\n📤 Step 3: Submitting solution...");
             submitSolution(webhookResponse.getWebhook(), webhookResponse.getAccessToken(), finalQuery);
 
             System.out.println("\n========================================");
-            System.out.println("✨ Process completed successfully!");
+            System.out.println("✨ ALL STEPS COMPLETED SUCCESSFULLY!");
             System.out.println("========================================");
 
         } catch (Exception e) {
-            System.err.println("\n❌ Error during webhook flow: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("\n❌ Error in webhook flow: " + e.getMessage());
             throw new RuntimeException("Webhook flow failed: " + e.getMessage(), e);
         }
     }
 
-    private WebhookResponse generateWebhook(String name, String regNo, String email) {
+    private WebhookResponse generateWebhook() {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            WebhookRequest request = new WebhookRequest(name, regNo, email);
+            WebhookRequest request = new WebhookRequest(YOUR_NAME, YOUR_REG_NO, YOUR_EMAIL);
 
-            System.out.println("Request Details: Name=" + name + ", RegNo=" + regNo + ", Email=" + email);
+            System.out.println("Sending request with:");
+            System.out.println("  Name: " + YOUR_NAME);
+            System.out.println("  RegNo: " + YOUR_REG_NO);
+            System.out.println("  Email: " + YOUR_EMAIL);
 
             HttpEntity<WebhookRequest> entity = new HttpEntity<>(request, headers);
 
@@ -103,26 +101,26 @@ public class WebhookService {
         String numbersOnly = regNo.replaceAll("[^0-9]", "");
 
         if (numbersOnly.isEmpty()) {
-            System.err.println("No numbers found in registration number!");
+            System.err.println("Warning: No numbers found in registration number!");
             numbersOnly = "00";
         }
 
         String lastTwoDigits = numbersOnly.length() >= 2
                 ? numbersOnly.substring(numbersOnly.length() - 2)
-                : numbersOnly;
+                : String.format("%02d", Integer.parseInt(numbersOnly));
 
         int lastNumber = Integer.parseInt(lastTwoDigits);
         boolean isOdd = lastNumber % 2 != 0;
 
-        System.out.println("Registration number: " + regNo);
+        System.out.println("Registration: " + regNo);
         System.out.println("Last two digits: " + lastTwoDigits);
-        System.out.println("Question type: " + (isOdd ? "Question 1 (Odd)" : "Question 2 (Even)"));
+        System.out.println("Question assigned: " + (isOdd ? "Question 1 (Odd)" : "Question 2 (Even)"));
 
         String sqlQuery;
 
         if (!isOdd) {
-            // Question 2 (Even numbers) - Based on the PDF provided
-            // Find highest salary NOT credited on 1st of any month
+            // Question 2 (Even numbers) - From the PDF provided
+            System.out.println("Using Question 2 SQL query");
             sqlQuery = """
                 SELECT 
                     p.AMOUNT AS SALARY,
@@ -136,11 +134,13 @@ public class WebhookService {
                 ORDER BY p.AMOUNT DESC
                 LIMIT 1""";
         } else {
-            // Question 1 (Odd numbers) - You need to check the Google Drive link for this
-            // This is a placeholder - UPDATE THIS based on Question 1 requirements
-            System.out.println("⚠️ Using Question 1 query - Please verify this matches the requirements!");
+            // Question 1 (Odd numbers)
+            System.out.println("Using Question 1 SQL query");
 
-            // Example placeholder query - REPLACE with actual Question 1 requirements
+            // TODO: UPDATE THIS WITH ACTUAL QUESTION 1 FROM GOOGLE DRIVE LINK
+            // https://drive.google.com/file/d/1IeSI6l6KoSQAF_fRihIT9tEDICtoz-G/view?usp=sharing
+
+            // PLACEHOLDER - MUST BE UPDATED WITH ACTUAL QUESTION 1 REQUIREMENTS
             sqlQuery = """
                 SELECT 
                     p.AMOUNT AS SALARY,
@@ -153,46 +153,65 @@ public class WebhookService {
                 WHERE DAY(p.PAYMENT_TIME) = 1
                 ORDER BY p.AMOUNT DESC
                 LIMIT 1""";
+
+            System.out.println("⚠️ WARNING: Using placeholder for Question 1 - UPDATE THIS!");
         }
 
-        System.out.println("SQL Query: \n" + sqlQuery);
+        System.out.println("SQL Query prepared: \n" + sqlQuery);
         return sqlQuery.trim();
-    }
-
-    // Public method for testing SQL query generation without executing
-    public String getSQLQueryForTesting(String regNo) {
-        return getSQLQuery(regNo);
     }
 
     private void submitSolution(String webhookUrl, String accessToken, String sqlQuery) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", accessToken);  // Using the token directly as JWT
+
+            // Try with Bearer prefix first (most common JWT format)
+            headers.set("Authorization", "Bearer " + accessToken);
 
             SolutionRequest request = new SolutionRequest(sqlQuery);
 
+            System.out.println("Submitting to: " + webhookUrl);
+            System.out.println("With Authorization: Bearer [token]");
+
             HttpEntity<SolutionRequest> entity = new HttpEntity<>(request, headers);
 
-            // Use the webhook URL from the response
-            System.out.println("Submitting to: " + webhookUrl);
+            try {
+                ResponseEntity<String> response = restTemplate.exchange(
+                        webhookUrl,
+                        HttpMethod.POST,
+                        entity,
+                        String.class
+                );
 
-            ResponseEntity<String> response = restTemplate.exchange(
-                    webhookUrl,  // Use the webhook URL received from first API
-                    HttpMethod.POST,
-                    entity,
-                    String.class
-            );
+                System.out.println("✅ Solution submitted successfully!");
+                System.out.println("Response Status: " + response.getStatusCode());
+                System.out.println("Response Body: " + response.getBody());
 
-            System.out.println("✅ Solution submitted successfully!");
-            System.out.println("Response Status: " + response.getStatusCode());
-            System.out.println("Response Body: " + response.getBody());
+            } catch (HttpClientErrorException e) {
+                if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                    System.out.println("Bearer token failed, trying without prefix...");
+
+                    // Try without Bearer prefix
+                    headers.set("Authorization", accessToken);
+                    HttpEntity<SolutionRequest> entity2 = new HttpEntity<>(request, headers);
+
+                    ResponseEntity<String> response = restTemplate.exchange(
+                            webhookUrl,
+                            HttpMethod.POST,
+                            entity2,
+                            String.class
+                    );
+
+                    System.out.println("✅ Solution submitted successfully (without Bearer)!");
+                    System.out.println("Response: " + response.getBody());
+                } else {
+                    throw e;
+                }
+            }
 
         } catch (HttpClientErrorException e) {
             System.err.println("Client Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
-            throw e;
-        } catch (HttpServerErrorException e) {
-            System.err.println("Server Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
             throw e;
         } catch (Exception e) {
             System.err.println("Error submitting solution: " + e.getMessage());
@@ -201,7 +220,7 @@ public class WebhookService {
     }
 
     private String maskToken(String token) {
-        if (token == null || token.length() < 10) return token;
+        if (token == null || token.length() < 20) return token;
         return token.substring(0, 10) + "..." + token.substring(token.length() - 5);
     }
 }

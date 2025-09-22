@@ -6,7 +6,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component  // IMPORTANT: This ensures automatic execution on startup
 public class WebhookRunner implements ApplicationRunner {
 
     @Autowired
@@ -14,7 +14,17 @@ public class WebhookRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        System.out.println("========================================");
+        System.out.println("Bajaj Finserv Health API Task");
+        System.out.println("Automatic Execution Starting...");
+        System.out.println("========================================");
 
-        webhookService.executeWebhookFlow();
+        try {
+            webhookService.executeWebhookFlow();
+            System.out.println("\n✅ Task completed successfully!");
+        } catch (Exception e) {
+            System.err.println("\n❌ Task failed: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

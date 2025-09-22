@@ -13,6 +13,7 @@ public class WebhookRequest {
         this.email = email;
     }
 
+    // Getters and Setters
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
@@ -21,13 +22,4 @@ public class WebhookRequest {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-
-    @Override
-    public String toString() {
-        return "WebhookRequest{" +
-                "name='" + name + '\'' +
-                ", regNo='" + regNo + '\'' +
-                ", email='" + email + '\'' +
-                '}';
-    }
 }

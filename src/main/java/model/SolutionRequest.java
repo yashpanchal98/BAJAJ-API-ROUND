@@ -9,13 +9,7 @@ public class SolutionRequest {
         this.finalQuery = finalQuery;
     }
 
+    // Getter and Setter
     public String getFinalQuery() { return finalQuery; }
     public void setFinalQuery(String finalQuery) { this.finalQuery = finalQuery; }
-
-    @Override
-    public String toString() {
-        return "SolutionRequest{" +
-                "finalQuery='" + finalQuery + '\'' +
-                '}';
-    }
 }
