@@ -98,7 +98,7 @@ ORDER BY p.AMOUNT DESC
 LIMIT 1
 Question 1 (Odd Numbers)
 
-
+```
 📁 Project Structure
 src/
 ├── main/
@@ -117,29 +117,37 @@ src/
 │       └── application.properties               # Configuration (port 9090)
 ├── pom.xml                                      # Maven dependencies
 └── README.md                                    # This file
+```
 
-
-⚙️ Configuration
+## ⚙️ Configuration
 
 application.properties:
 propertiesspring.application.name=Bajaj-API-round
 server.port=9090
 logging.level.com.bajaj=DEBUG
+
 🐛 Troubleshooting
+
 Common Issues and Solutions
 IssuePossible CauseSolution500 Error from Bajaj APIInvalid registration formatTry different formats: "12345" or "REG12345"401 UnauthorizedJWT token issueCheck console logs, app tries multiple auth formatsApplication doesn't runWrong Java versionEnsure Java 21 is installedNo outputCheck logsLook for errors in console outputConnection refusedNetwork issueCheck internet connection and firewall
 Console Output Examples
+
 Successful execution:
+
 ========================================
 Bajaj Finserv Health API Task
+
 Automatic Execution Starting...
+
 ========================================
+
 📡 Step 1: Generating webhook...
 ✅ Webhook URL received: https://...
 🔑 Access Token received: eyJhbGc...
 📊 Step 2: Preparing SQL query...
 📤 Step 3: Submitting solution...
 ✨ ALL STEPS COMPLETED SUCCESSFULLY!
+
 ========================================
 Error example:
 ❌ Error in webhook flow: 500 Internal Server Error
@@ -189,8 +197,6 @@ git clone <https://github.com/yashpanchal98/BAJAJ-API-ROUND>
 
 # Navigate
 cd bajaj-api-round
-
-# Update details in WebhookService.java
 
 # Then build
 mvn clean package
