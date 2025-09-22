@@ -1,3 +1,4 @@
+// File: src/main/java/com/bajaj_api_assignment/Bajaj/API/round/service/WebhookService.java
 package com.bajaj_api_assignment.Bajaj.API.round.service;
 
 import com.bajaj_api_assignment.Bajaj.API.round.model.WebhookRequest;
@@ -16,51 +17,62 @@ public class WebhookService {
     @Autowired
     private RestTemplate restTemplate;
 
-    // TODO: UPDATE THESE WITH YOUR ACTUAL DETAILS
-    private static final String YOUR_NAME = "Yash Panchal";  // Change this
-    private static final String YOUR_REG_NO = "0101CS221153";  // Change this to your registration number
-    private static final String YOUR_EMAIL = "pclyash@gmail.com";  // Change this
+    // Default details - UPDATE THESE WITH YOUR ACTUAL DETAILS
+    private static final String DEFAULT_NAME = "Yash Panchal";  // Change this
+    private static final String DEFAULT_REG_NO = "0101CS221153";  // Change this to your registration number
+    private static final String DEFAULT_EMAIL = "pclyash@gmail.com";  // Change this
 
     private static final String GENERATE_WEBHOOK_URL = "https://bfhldevapigw.healthrx.co.in/hiring/generateWebhook/JAVA";
     private static final String SUBMIT_WEBHOOK_BASE_URL = "https://bfhldevapigw.healthrx.co.in/hiring/testWebhook/JAVA";
 
+    // Default method using predefined details
     public void executeWebhookFlow() {
+        executeWebhookFlowWithDetails(DEFAULT_NAME, DEFAULT_REG_NO, DEFAULT_EMAIL);
+    }
+
+    // Method with custom details for testing
+    public void executeWebhookFlowWithDetails(String name, String regNo, String email) {
         try {
             // Step 1: Generate webhook
             System.out.println("\n📡 Step 1: Generating webhook...");
-            WebhookResponse webhookResponse = generateWebhook();
+            WebhookResponse webhookResponse = generateWebhook(name, regNo, email);
 
             if (webhookResponse == null || webhookResponse.getWebhook() == null) {
-                System.err.println(" Failed to generate webhook - No response received");
+                System.err.println("❌ Failed to generate webhook - No response received");
                 return;
             }
 
-            System.out.println(" Webhook URL received: " + webhookResponse.getWebhook());
-            System.out.println(" Access Token received: " + maskToken(webhookResponse.getAccessToken()));
+            System.out.println("✅ Webhook URL received: " + webhookResponse.getWebhook());
+            System.out.println("🔑 Access Token received: " + maskToken(webhookResponse.getAccessToken()));
 
+            // Step 2: Determine which SQL query to use based on registration number
+            System.out.println("\n📊 Step 2: Determining SQL query based on registration number...");
+            String finalQuery = getSQLQuery(regNo);
+            System.out.println("✅ SQL Query prepared");
 
-            System.out.println("\n Step 2: Determining SQL query based on registration number...");
-            String finalQuery = getSQLQuery(YOUR_REG_NO);
-            System.out.println(" SQL Query prepared");
-
-
-            System.out.println("\n Step 3: Submitting solution to webhook...");
+            // Step 3: Submit solution to webhook
+            System.out.println("\n📤 Step 3: Submitting solution to webhook...");
             submitSolution(webhookResponse.getWebhook(), webhookResponse.getAccessToken(), finalQuery);
 
+            System.out.println("\n========================================");
+            System.out.println("✨ Process completed successfully!");
+            System.out.println("========================================");
+
         } catch (Exception e) {
-            System.err.println("\n Error during webhook flow: " + e.getMessage());
+            System.err.println("\n❌ Error during webhook flow: " + e.getMessage());
             e.printStackTrace();
+            throw new RuntimeException("Webhook flow failed: " + e.getMessage(), e);
         }
     }
 
-    private WebhookResponse generateWebhook() {
+    private WebhookResponse generateWebhook(String name, String regNo, String email) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            WebhookRequest request = new WebhookRequest(YOUR_NAME, YOUR_REG_NO, YOUR_EMAIL);
+            WebhookRequest request = new WebhookRequest(name, regNo, email);
 
-            System.out.println("Request Details: Name=" + YOUR_NAME + ", RegNo=" + YOUR_REG_NO + ", Email=" + YOUR_EMAIL);
+            System.out.println("Request Details: Name=" + name + ", RegNo=" + regNo + ", Email=" + email);
 
             HttpEntity<WebhookRequest> entity = new HttpEntity<>(request, headers);
 
@@ -126,7 +138,7 @@ public class WebhookService {
         } else {
             // Question 1 (Odd numbers) - You need to check the Google Drive link for this
             // This is a placeholder - UPDATE THIS based on Question 1 requirements
-            System.out.println("Using Question 1 query - Please verify this matches the requirements!");
+            System.out.println("⚠️ Using Question 1 query - Please verify this matches the requirements!");
 
             // Example placeholder query - REPLACE with actual Question 1 requirements
             sqlQuery = """
@@ -145,6 +157,11 @@ public class WebhookService {
 
         System.out.println("SQL Query: \n" + sqlQuery);
         return sqlQuery.trim();
+    }
+
+    // Public method for testing SQL query generation without executing
+    public String getSQLQueryForTesting(String regNo) {
+        return getSQLQuery(regNo);
     }
 
     private void submitSolution(String webhookUrl, String accessToken, String sqlQuery) {
@@ -167,7 +184,7 @@ public class WebhookService {
                     String.class
             );
 
-            System.out.println(" Solution submitted successfully!");
+            System.out.println("✅ Solution submitted successfully!");
             System.out.println("Response Status: " + response.getStatusCode());
             System.out.println("Response Body: " + response.getBody());
 
