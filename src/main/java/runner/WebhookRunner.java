@@ -14,16 +14,12 @@ public class WebhookRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        System.out.println("========================================");
-        System.out.println("Bajaj Finserv Health API Task");
-        System.out.println("Automatic Execution Starting...");
-        System.out.println("========================================");
 
         try {
             webhookService.executeWebhookFlow();
-            System.out.println("\n✅ Task completed successfully!");
+            System.out.println("\nTask completed successfully!");
         } catch (Exception e) {
-            System.err.println("\n❌ Task failed: " + e.getMessage());
+            System.err.println("\nTask failed: " + e.getMessage());
             e.printStackTrace();
         }
     }

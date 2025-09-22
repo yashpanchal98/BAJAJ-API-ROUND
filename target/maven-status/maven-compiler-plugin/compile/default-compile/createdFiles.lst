@@ -1,8 +1,6 @@
 com/bajaj_api_assignment/Bajaj/API/round/model/SolutionRequest.class
 com/bajaj_api_assignment/Bajaj/API/round/BajajApiRoundApplication.class
 com/bajaj_api_assignment/Bajaj/API/round/service/WebhookService.class
-com/bajaj_api_assignment/Bajaj/API/round/controller/TestController$RegistrationDetails.class
 com/bajaj_api_assignment/Bajaj/API/round/runner/WebhookRunner.class
 com/bajaj_api_assignment/Bajaj/API/round/model/WebhookResponse.class
-com/bajaj_api_assignment/Bajaj/API/round/controller/TestController.class
 com/bajaj_api_assignment/Bajaj/API/round/model/WebhookRequest.class

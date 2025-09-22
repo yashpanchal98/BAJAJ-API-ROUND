@@ -21,16 +21,16 @@ public class WebhookService {
     private ObjectMapper objectMapper;
 
     // TODO: UPDATE THESE WITH YOUR ACTUAL DETAILS BEFORE SUBMISSION
-    private static final String YOUR_NAME = "Yash Panchal";  // CHANGE THIS
-    private static final String YOUR_REG_NO = "0101CS221153";  // CHANGE THIS
-    private static final String YOUR_EMAIL = "pclyash@gmail.com";  // CHANGE THIS
+    private static final String YOUR_NAME = "Yash Panchal";
+    private static final String YOUR_REG_NO = "0101CS221153";
+    private static final String YOUR_EMAIL = "pclyash@gmail.com";
 
     private static final String GENERATE_WEBHOOK_URL = "https://bfhldevapigw.healthrx.co.in/hiring/generateWebhook/JAVA";
 
     public void executeWebhookFlow() {
         try {
             // Step 1: Generate webhook
-            System.out.println("\n📡 Step 1: Generating webhook...");
+            System.out.println("\n Step 1: Generating webhook...");
             System.out.println("Using registration: " + YOUR_REG_NO);
 
             WebhookResponse webhookResponse = generateWebhook();
@@ -39,23 +39,17 @@ public class WebhookService {
                 throw new RuntimeException("Failed to generate webhook - No response received");
             }
 
-            System.out.println("✅ Webhook URL received: " + webhookResponse.getWebhook());
-            System.out.println("🔑 Access Token received: " + maskToken(webhookResponse.getAccessToken()));
+            System.out.println(" Webhook URL received: " + webhookResponse.getWebhook());
+            System.out.println(" Access Token received: " + maskToken(webhookResponse.getAccessToken()));
 
-            // Step 2: Determine SQL query based on registration number
-            System.out.println("\n📊 Step 2: Preparing SQL query...");
+            System.out.println("\n Step 2: Preparing SQL query...");
             String finalQuery = getSQLQuery(YOUR_REG_NO);
 
-            // Step 3: Submit solution
-            System.out.println("\n📤 Step 3: Submitting solution...");
+            System.out.println("\n Step 3: Submitting solution...");
             submitSolution(webhookResponse.getWebhook(), webhookResponse.getAccessToken(), finalQuery);
 
-            System.out.println("\n========================================");
-            System.out.println("✨ ALL STEPS COMPLETED SUCCESSFULLY!");
-            System.out.println("========================================");
-
         } catch (Exception e) {
-            System.err.println("\n❌ Error in webhook flow: " + e.getMessage());
+            System.err.println("\n Error in webhook flow: " + e.getMessage());
             throw new RuntimeException("Webhook flow failed: " + e.getMessage(), e);
         }
     }
@@ -97,7 +91,6 @@ public class WebhookService {
     }
 
     private String getSQLQuery(String regNo) {
-        // Extract last two digits from registration number
         String numbersOnly = regNo.replaceAll("[^0-9]", "");
 
         if (numbersOnly.isEmpty()) {
@@ -119,7 +112,6 @@ public class WebhookService {
         String sqlQuery;
 
         if (!isOdd) {
-            // Question 2 (Even numbers) - From the PDF provided
             System.out.println("Using Question 2 SQL query");
             sqlQuery = """
                 SELECT 
@@ -134,13 +126,8 @@ public class WebhookService {
                 ORDER BY p.AMOUNT DESC
                 LIMIT 1""";
         } else {
-            // Question 1 (Odd numbers)
             System.out.println("Using Question 1 SQL query");
 
-            // TODO: UPDATE THIS WITH ACTUAL QUESTION 1 FROM GOOGLE DRIVE LINK
-            // https://drive.google.com/file/d/1IeSI6l6KoSQAF_fRihIT9tEDICtoz-G/view?usp=sharing
-
-            // PLACEHOLDER - MUST BE UPDATED WITH ACTUAL QUESTION 1 REQUIREMENTS
             sqlQuery = """
                 SELECT 
                     p.AMOUNT AS SALARY,
@@ -154,7 +141,7 @@ public class WebhookService {
                 ORDER BY p.AMOUNT DESC
                 LIMIT 1""";
 
-            System.out.println("⚠️ WARNING: Using placeholder for Question 1 - UPDATE THIS!");
+            System.out.println(" WARNING: Using placeholder for Question 1 - UPDATE THIS!");
         }
 
         System.out.println("SQL Query prepared: \n" + sqlQuery);
@@ -166,7 +153,6 @@ public class WebhookService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            // Try with Bearer prefix first (most common JWT format)
             headers.set("Authorization", "Bearer " + accessToken);
 
             SolutionRequest request = new SolutionRequest(sqlQuery);
@@ -184,7 +170,7 @@ public class WebhookService {
                         String.class
                 );
 
-                System.out.println("✅ Solution submitted successfully!");
+                System.out.println("Solution submitted successfully!");
                 System.out.println("Response Status: " + response.getStatusCode());
                 System.out.println("Response Body: " + response.getBody());
 
@@ -192,7 +178,6 @@ public class WebhookService {
                 if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                     System.out.println("Bearer token failed, trying without prefix...");
 
-                    // Try without Bearer prefix
                     headers.set("Authorization", accessToken);
                     HttpEntity<SolutionRequest> entity2 = new HttpEntity<>(request, headers);
 
@@ -203,7 +188,7 @@ public class WebhookService {
                             String.class
                     );
 
-                    System.out.println("✅ Solution submitted successfully (without Bearer)!");
+                    System.out.println("Solution submitted successfully (without Bearer)!");
                     System.out.println("Response: " + response.getBody());
                 } else {
                     throw e;
